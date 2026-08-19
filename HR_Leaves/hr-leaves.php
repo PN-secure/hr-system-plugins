@@ -19,7 +19,7 @@ define( 'HR_LEAVES_DIR', plugin_dir_path( __FILE__ ) );
 register_activation_hook( __FILE__, 'hr_leaves_activate_plugin' );
 
 function hr_leaves_activate_plugin() {
-    require_once HR_LEAVES_DIR . 'includes/db/class-hr-leaves-schema.php';
+    require_once HR_LEAVES_DIR . 'includes/db/class-hr-time-schema.php';
     if ( class_exists( 'HR_Leaves_Schema' ) ) {
         HR_Leaves_Schema::create_tables();
     }
