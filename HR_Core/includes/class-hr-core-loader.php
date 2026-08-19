@@ -29,6 +29,7 @@ class HR_Core_Loader {
         require_once HR_CORE_DIR . 'includes/models/class-hr-employee.php';
         require_once HR_CORE_DIR . 'includes/models/class-hr-department.php';
         require_once HR_CORE_DIR . 'includes/models/class-hr-role.php';
+        require_once HR_CORE_DIR . 'includes/models/class-hr-manager-relation.php';
 
         // 4. WARSTWA KONTROLERÓW API (Endpointy wystawiane na świat)
         require_once HR_CORE_DIR . 'includes/api/class-hr-api-auth.php';
