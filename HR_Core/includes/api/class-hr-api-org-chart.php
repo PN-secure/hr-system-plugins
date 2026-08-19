@@ -26,6 +26,13 @@ class HR_API_Org_Chart {
             'callback'            => array( $this, 'get_team' ),
             'permission_callback' => '__return_true',
         ) );
+
+        // POST: Przypisanie roli pracownikowi (Tylko HR Admin)
+        register_rest_route( $this->namespace, '/org-chart/create-role', array(
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => array( $this, 'create_role' ),
+            'permission_callback' => '__return_true',
+        ) );
     }
 
     /**
@@ -66,5 +73,24 @@ class HR_API_Org_Chart {
         $team = HR_Manager_Relation::get_subordinates( $manager_id );
 
         return new WP_REST_Response( $team, 200 );
+    }
+
+    /**
+     * Endpoint dla HR do stworzenia roli pracownika. (Tylko HR Admin)
+     */
+    public function create_role( WP_REST_Request $request ) {
+        if ( ! HR_Permissions::has_role( 'hr_admin' ) ) {
+            return new WP_Error( 'rest_forbidden', 'Brak uprawnień do tworzenia ról.', array( 'status' => 403 ) );
+        }
+
+        $role_name = $request->get_param( 'role_name' );
+
+        $role_id = HR_Role::create( $role_name );
+
+        if ( ! $role_id ) {
+            return new WP_Error( 'db_error', 'Nie udało się stworzyć roli.', array( 'status' => 400 ) );
+        }
+
+        return new WP_REST_Response( array( 'success' => true, 'role_id' => $role_id ), 200 );
     }
 }
