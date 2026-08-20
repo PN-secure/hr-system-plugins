@@ -22,10 +22,13 @@ class HR_Leaves_Loader {
         require_once HR_LEAVES_DIR . 'includes/models/class-hr-leave-type.php';
         require_once HR_LEAVES_DIR . 'includes/models/class-hr-leave-request.php';
         require_once HR_LEAVES_DIR . 'includes/models/class-hr-calculator.php';
+        require_once HR_LEAVES_DIR . 'includes/models/class-hr-time-entry.php';
 
         // WARSTWA KONTROLERÓW (REST API)
         require_once HR_LEAVES_DIR . 'includes/api/class-hr-api-leave-types.php';
         require_once HR_LEAVES_DIR . 'includes/api/class-hr-api-requests.php';
+        require_once HR_LEAVES_DIR . 'includes/api/class-hr-api-time-tracking.php';
+        require_once HR_LEAVES_DIR . 'includes/api/class-hr-api-delegations.php';
     }
 
     /**
@@ -44,6 +47,14 @@ class HR_Leaves_Loader {
         // Uruchomienie Endpointów dla składania i akceptacji wniosków
         if ( class_exists( 'HR_API_Requests' ) ) {
             ( new HR_API_Requests() )->init();
+        }
+
+        if ( class_exists( 'HR_API_Time_Tracking' ) ) {
+            ( new HR_API_Time_Tracking() )->init();
+        }
+
+        if ( class_exists( 'HR_API_Delegations' ) ) {
+            ( new HR_API_Delegations() )->init();
         }
     }
 }

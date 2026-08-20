@@ -36,7 +36,7 @@ class HR_API_Time_Tracking {
 
     public function handle_clock_in( WP_REST_Request $request ) {
         global $hr_current_user;
-        $employee_id = $hr_current_user->user_id;
+        $employee_id = $hr_current_user->employee_id;
         
         // Pobranie IP użytkownika wykonującego żądanie HTTP
         $ip_address = $_SERVER['REMOTE_ADDR'];
@@ -52,7 +52,7 @@ class HR_API_Time_Tracking {
 
     public function handle_clock_out( WP_REST_Request $request ) {
         global $hr_current_user;
-        $employee_id = $hr_current_user->user_id;
+        $employee_id = $hr_current_user->employee_id;
 
         $result = HR_Time_Entry::clock_out( $employee_id );
 
@@ -65,7 +65,7 @@ class HR_API_Time_Tracking {
 
     public function get_timesheet( WP_REST_Request $request ) {
         global $hr_current_user;
-        $employee_id = $hr_current_user->user_id;
+        $employee_id = $hr_current_user->employee_id;
 
         $year = $request->get_param( 'year' );
         $month = $request->get_param( 'month' );

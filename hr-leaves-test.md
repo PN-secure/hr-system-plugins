@@ -7,12 +7,18 @@
 
 ## class-hr-api-requests.php
 
-Przetestowane zostały /apply, /my-requests - działają bez zarzutu
+Przetestowane zostały /apply, /pending, /my-requests - działają bez zarzutu
+
+id/status - niby działa ale nie wiadomo czy nie rozsypał innych rzeczy
 
 ## class-hr-api-delegations.php
+
+Działa ale nie trzeba będzie całość jeszcze raz przetestować
 
 ## class-hr-api-leave-types.php
 
 Działa bez problemów
 
 ## class-hr-api-time-tracking.php
+
+Wszystko działa
