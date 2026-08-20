@@ -33,6 +33,12 @@ class HR_API_Requests {
             'callback'            => array( $this, 'update_status' ),
             'permission_callback' => '__return_true',
         ) );
+        // 4. Pobieranie historycznych i aktualnych wniosków pracownika
+        register_rest_route( $this->namespace, '/leaves/my-requests', array(
+            'methods'             => WP_REST_Server::READABLE,
+            'callback'            => array( $this, 'get_my_requests' ),
+            'permission_callback' => '__return_true',
+        ) );
     }
 
     /**
@@ -42,7 +48,7 @@ class HR_API_Requests {
         // MAGIA CROSS-PLUGIN: Odczytujemy, kim jest wysyłający, z tokena JWT odkodowanego przez Core!
         global $hr_current_user; 
         
-        $employee_id   = $hr_current_user->user_id; // Frontend nie musi przysyłać ID! Bierzemy je z bezpiecznego tokena.
+        $employee_id   = $hr_current_user->employee_id; // ID pracownika HR z bezpiecznego tokena.
         $leave_type_id = $request->get_param( 'leave_type_id' );
         $start_date    = $request->get_param( 'start_date' );
         $end_date      = $request->get_param( 'end_date' );
@@ -69,7 +75,7 @@ class HR_API_Requests {
         global $wpdb;
         global $hr_current_user;
 
-        $manager_id = $hr_current_user->user_id;
+        $manager_id = $hr_current_user->employee_id;
 
         // Krok 1: Korzystamy z modelu wtyczki HR Core, żeby pobrać listę podwładnych tego menedżera
         if ( ! class_exists( 'HR_Manager_Relation' ) ) {
@@ -110,16 +116,35 @@ class HR_API_Requests {
 
         // Dodatkowe zabezpieczenie: Czy osoba próbująca zmienić status faktycznie jest menedżerem lub HR-em?
         // (W produkcji musielibyśmy sprawdzić w drzewie, czy to na pewno menedżer tego konkretnego pracownika)
-        if ( ! HR_Permissions::has_role( 'hr_admin' ) && ! HR_Permissions::has_role( 'manager' ) ) {
-            return new WP_Error( 'rest_forbidden', 'Tylko przełożony może zatwierdzać wnioski.', array( 'status' => 403 ) );
+        $is_admin = HR_Permissions::has_role( 'hr_admin' );
+
+        $is_manager = HR_Leave_Request::can_user_update_request(
+            $request_id,
+            $hr_current_user->employee_id
+        );
+
+            // Sprawdzenie, czy przełożony może zmienić status tego konkretnego wniosku.
+            if ( ! $is_admin && ! $is_manager ) {
+            return new WP_Error(
+                'rest_forbidden', 'Nie masz uprawnień do zmiany statusu tego wniosku.',
+                array( 'status' => 403 )
+            );
         }
 
-        $success = HR_Leave_Request::change_status( $request_id, $new_status, $hr_current_user->user_id, $reject_reason );
+        $success = HR_Leave_Request::change_status( $request_id, $new_status, $hr_current_user->employee_id, $reject_reason );
 
         if ( ! $success ) {
             return new WP_Error( 'update_failed', 'Nie udało się zmienić statusu wniosku.', array( 'status' => 500 ) );
         }
 
         return new WP_REST_Response( array( 'success' => true, 'message' => 'Status wniosku został zaktualizowany.' ), 200 );
+    }
+
+    public function get_my_requests( WP_REST_Request $request ) {
+        global $hr_current_user;
+
+        $requests = HR_Leave_Request::get_by_employee( $hr_current_user->employee_id );
+
+        return new WP_REST_Response( $requests, 200 );
     }
 }

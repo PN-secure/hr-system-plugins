@@ -13,6 +13,37 @@ class HR_Leave_Request {
         return $wpdb->prefix . self::$table_suffix;
     }
 
+    // Funkcja mapuje ID użytkownika WordPressa na ID pracownika w systemie HR
+    private static function get_employee_id_by_wp_user_id( $wp_user_id ) {
+        global $wpdb;
+
+        return (int) $wpdb->get_var(
+            $wpdb->prepare(
+                'SELECT id FROM ' . $wpdb->prefix . 'hr_employees WHERE wp_user_id = %d LIMIT 1',
+                absint( $wp_user_id )
+            )
+        );
+    }
+
+    public static function get_by_employee( $employee_id ) {
+        global $wpdb;
+
+        if ( 0 === $employee_id ) {
+            return array();
+        }
+
+        $table_requests = self::get_table_name();
+        $table_types    = $wpdb->prefix . 'hr_leave_types';
+
+        $sql = "SELECT r.*, t.name AS leave_type_name
+                FROM {$table_requests} r
+                LEFT JOIN {$table_types} t ON r.leave_type_id = t.id
+                WHERE r.employee_id = %d
+                ORDER BY r.start_date DESC, r.id DESC";
+
+        return $wpdb->get_results( $wpdb->prepare( $sql, absint( $employee_id ) ), ARRAY_A );
+    }
+
     /**
      * Główny proces składania wniosku urlopowego.
      */
@@ -20,6 +51,10 @@ class HR_Leave_Request {
         global $wpdb;
         $table_requests = self::get_table_name();
         $table_types = $wpdb->prefix . 'hr_leave_types';
+
+        if ( 0 === $employee_id ) {
+            return new WP_Error( 'employee_not_found', 'Nie znaleziono pracownika w systemie HR.', array( 'status' => 404 ) );
+        }
 
         // 1. Sprawdzenie, czy daty mają logiczny sens
         if ( strtotime( $start_date ) > strtotime( $end_date ) ) {
@@ -121,5 +156,29 @@ class HR_Leave_Request {
         $used = $wpdb->get_var( $wpdb->prepare( $sql, $employee_id, $leave_type_id, $year ) );
 
         return (int) $used;
+    }
+
+    // Sprawdzenie, czy menedżer może zmienić status wniosku pracownika
+    public static function can_user_update_request( $request_id, $manager_employee_id ) {
+        global $wpdb;
+
+        $table_requests  = self::get_table_name();
+        $table_relations = $wpdb->prefix . 'hr_manager_relations';
+
+        $result = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT 1
+                FROM {$table_requests} r
+                INNER JOIN {$table_relations} mr
+                    ON mr.employee_id = r.employee_id
+                WHERE r.id = %d
+                AND mr.manager_id = %d
+                LIMIT 1",
+                $request_id,
+                $manager_employee_id
+            )
+        );
+
+        return (bool) $result;
     }
 }
