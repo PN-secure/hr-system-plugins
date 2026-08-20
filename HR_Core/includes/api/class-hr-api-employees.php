@@ -26,6 +26,13 @@ class HR_API_Employees {
             'callback'            => array( $this, 'create_employee' ),
             'permission_callback' => '__return_true',
         ) );
+
+        // POST /wp-json/hr/v1/employees/link-user - Łączenie konta WordPress z pracownikiem
+        register_rest_route( $this->namespace, '/employees/link-user', array(
+            'methods'             => WP_REST_Server::CREATABLE,
+            'callback'            => array( $this, 'link_wp_user' ),
+            'permission_callback' => '__return_true',
+        ) );
     }
 
     /**
@@ -92,5 +99,45 @@ class HR_API_Employees {
             'message' => __( 'Pracownik został dodany.', 'hr-core' ),
             'id'      => $new_employee_id
         ), 201 );
+    }
+
+    /**
+     * Łączy konto WordPress z pracownikiem w systemie HR
+     */
+    public function link_wp_user( WP_REST_Request $request ) {
+        // Tylko administrator HR może łączyć konta WordPress z pracownikami
+        if ( ! HR_Permissions::has_role( 'hr_admin' ) ) {
+            return new WP_Error( 
+                'rest_forbidden', 
+                __( 'Nie masz uprawnień, aby połączyć konto WordPress z pracownikiem.', 'hr-core' ), 
+                array( 'status' => 403 ) 
+            );
+        }
+
+        $employee_id = $request->get_param( 'employee_id' );
+        $wp_user_id  = $request->get_param( 'wp_user_id' );
+
+        if ( empty( $employee_id ) || empty( $wp_user_id ) ) {
+            return new WP_Error( 
+                'missing_fields', 
+                __( 'ID pracownika i ID użytkownika WordPress są wymagane.', 'hr-core' ), 
+                array( 'status' => 400 ) 
+            );
+        }
+
+        $success = HR_Employee::link_wp_user( $employee_id, $wp_user_id );
+
+        if ( ! $success ) {
+            return new WP_Error( 
+                'db_error', 
+                __( 'Nie udało się połączyć konta WordPress z pracownikiem.', 'hr-core' ), 
+                array( 'status' => 500 ) 
+            );
+        }
+
+        return new WP_REST_Response( array(
+            'success' => true,
+            'message' => __( 'Konto WordPress zostało połączone.', 'hr-core' )
+        ), 200 );
     }
 }

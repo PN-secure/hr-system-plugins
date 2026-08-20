@@ -64,4 +64,50 @@ class HR_Employee {
 
         return $wpdb->insert_id; // Zwraca ID nowo stworzonego pracownika
     }
+
+    /**
+     * Łączy pracownika HR z użytkownikiem WordPress.
+     */
+    public static function link_wp_user( $employee_id, $wp_user_id ) {
+        global $wpdb;
+        $table = self::get_table_name();
+
+        $employee_id = absint( $employee_id );
+        $wp_user_id  = absint( $wp_user_id );
+
+        if ( ! $employee_id || ! $wp_user_id || ! get_userdata( $wp_user_id ) ) {
+            return false;
+        }
+
+        $employee_exists = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT id FROM {$table} WHERE id = %d",
+                $employee_id
+            )
+        );
+
+        if ( ! $employee_exists ) {
+            return false;
+        }
+
+        $linked_employee = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT id FROM {$table} WHERE wp_user_id = %d AND id != %d",
+                $wp_user_id,
+                $employee_id
+            )
+        );
+
+        if ( $linked_employee ) {
+            return false;
+        }
+
+        return false !== $wpdb->update(
+            $table,
+            array( 'wp_user_id' => $wp_user_id ),
+            array( 'id' => $employee_id ),
+            array( '%d' ),
+            array( '%d' )
+        );
+    }
 }

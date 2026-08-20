@@ -59,8 +59,10 @@ class HR_API_Auth {
         // Pobieramy lub przypisujemy rolę w systemie HR dla tego użytkownika
         // W produkcyjnym systemie rola wyciągana jest z naszej tabeli hr_employees
         $hr_role = get_user_meta( $user->ID, 'hr_role', true );
-        if ( empty( $hr_role ) ) {
-            $hr_role = 'hr_admin'; // Domyślna rola
+        if ( user_can( $user, 'manage_options' ) ) {
+            $hr_role = 'hr_admin';
+        } elseif ( empty( $hr_role ) ) {
+            $hr_role = 'employee';
         }
 
         // Generujemy bezpieczny token JWT
