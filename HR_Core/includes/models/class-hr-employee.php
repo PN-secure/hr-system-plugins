@@ -62,7 +62,14 @@ class HR_Employee {
             return false;
         }
 
-        return $wpdb->insert_id; // Zwraca ID nowo stworzonego pracownika
+        $employee_id = $wpdb->insert_id;
+        $wp_user     = get_user_by( 'email', sanitize_email( $data['email'] ) );
+
+        if ( $wp_user ) {
+            self::link_wp_user( $employee_id, $wp_user->ID );
+        }
+
+        return $employee_id;
     }
 
     /**
@@ -109,5 +116,31 @@ class HR_Employee {
             array( '%d' ),
             array( '%d' )
         );
+    }
+
+    /**
+     * Pobiera rolę systemową na podstawie stanowiska przypisanego pracownikowi.
+     */
+    public static function get_hr_role_by_wp_user_id( $wp_user_id ) {
+        global $wpdb;
+        $table_emp  = self::get_table_name();
+        $table_role = $wpdb->prefix . 'hr_roles';
+
+        $role_name = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT r.name
+                FROM {$table_emp} e
+                INNER JOIN {$table_role} r ON e.role_id = r.id
+                WHERE e.wp_user_id = %d
+                LIMIT 1",
+                absint( $wp_user_id )
+            )
+        );
+
+        if ( ! $role_name ) {
+            return 'employee';
+        }
+
+        return $role_name;
     }
 }

@@ -56,13 +56,12 @@ class HR_API_Auth {
             );
         }
 
-        // Pobieramy lub przypisujemy rolę w systemie HR dla tego użytkownika
-        // W produkcyjnym systemie rola wyciągana jest z naszej tabeli hr_employees
-        $hr_role = get_user_meta( $user->ID, 'hr_role', true );
+        // Administrator WordPressa ma zawsze uprawnienia administratora HR.
         if ( user_can( $user, 'manage_options' ) ) {
             $hr_role = 'hr_admin';
-        } elseif ( empty( $hr_role ) ) {
-            $hr_role = 'employee';
+        } else {
+            // Dla pozostałych użytkowników rola wynika ze stanowiska w HR.
+            $hr_role = HR_Employee::get_hr_role_by_wp_user_id( $user->ID, $user->user_email );
         }
 
         // Generujemy bezpieczny token JWT
