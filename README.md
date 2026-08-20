@@ -21,6 +21,7 @@ curl -X POST http://<adres_strony>/wp-json/hr/v1/employees -H "Authorization: Be
     "first_name": "<imie>",
     "last_name": "<nazwisko>",
     "email": "<mail>",
+    "password": "<haslo>",
     "department_id": <id_dzialu>
 }'
 ```

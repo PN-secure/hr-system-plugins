@@ -59,7 +59,11 @@ class HR_API_Auth {
         // Administrator WordPressa ma zawsze uprawnienia administratora HR.
         if ( user_can( $user, 'manage_options' ) ) {
             $hr_role = 'hr_admin';
-        } else {
+        }
+        else if ( HR_Employee::get_role( $user->ID ) ) {
+            $hr_role = HR_Employee::get_role( $user->ID );
+        }
+        else {
             $hr_role = 'employee';
         }
 

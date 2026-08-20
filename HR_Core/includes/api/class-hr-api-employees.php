@@ -61,27 +61,39 @@ class HR_API_Employees {
             'first_name'      => $request->get_param( 'first_name' ),
             'last_name'       => $request->get_param( 'last_name' ),
             'email'           => $request->get_param( 'email' ),
+            'password'        => $request->get_param( 'password' ),
             'department_id'   => $request->get_param( 'department_id' ),
             'role_id'         => $request->get_param( 'role_id' ),
             'employment_date' => $request->get_param( 'employment_date' ),
         );
 
         // Walidacja podstawowa na poziomie kontrolera
-        if ( empty( $data['first_name'] ) || empty( $data['last_name'] ) || empty( $data['email'] ) ) {
+        if ( empty( $data['first_name'] ) || empty( $data['last_name'] ) || empty( $data['email'] ) || empty( $data['password'] ) ) {
             return new WP_Error( 
                 'missing_fields', 
-                __( 'Imię, nazwisko i adres email są obowiązkowe.', 'hr-core' ), 
+                __( 'Imię, nazwisko, adres email i hasło są obowiązkowe.', 'hr-core' ),
                 array( 'status' => 400 ) 
             );
         }
 
-        // Zlecenie zapisu do Modelu
+        if ( ! is_email( $data['email'] ) ) {
+            return new WP_Error(
+                'invalid_email',
+                __( 'Podany adres email jest nieprawidłowy.', 'hr-core' ),
+                array( 'status' => 400 )
+            );
+        }
+
         $new_employee_id = HR_Employee::create( $data );
+
+        if ( is_wp_error( $new_employee_id ) ) {
+            return $new_employee_id;
+        }
 
         if ( ! $new_employee_id ) {
             return new WP_Error( 
                 'db_error', 
-                __( 'Błąd bazy danych. Pracownik z takim adresem email może już istnieć.', 'hr-core' ), 
+                __( 'Błąd bazy danych. Pracownik z takim adresem email może już istnieć.', 'hr-core' ),
                 array( 'status' => 500 ) 
             );
         }
