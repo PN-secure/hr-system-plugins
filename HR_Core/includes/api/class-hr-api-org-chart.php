@@ -27,7 +27,7 @@ class HR_API_Org_Chart {
             'permission_callback' => '__return_true',
         ) );
 
-        // POST: Przypisanie roli pracownikowi (Tylko HR Admin)
+        // POST: Stworzenie nowej roli pracownika
         register_rest_route( $this->namespace, '/org-chart/create-role', array(
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => array( $this, 'create_role' ),
