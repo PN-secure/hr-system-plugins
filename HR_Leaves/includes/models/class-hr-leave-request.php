@@ -13,18 +13,6 @@ class HR_Leave_Request {
         return $wpdb->prefix . self::$table_suffix;
     }
 
-    // Funkcja mapuje ID użytkownika WordPressa na ID pracownika w systemie HR
-    private static function get_employee_id_by_wp_user_id( $wp_user_id ) {
-        global $wpdb;
-
-        return (int) $wpdb->get_var(
-            $wpdb->prepare(
-                'SELECT id FROM ' . $wpdb->prefix . 'hr_employees WHERE wp_user_id = %d LIMIT 1',
-                absint( $wp_user_id )
-            )
-        );
-    }
-
     public static function get_by_employee( $employee_id ) {
         global $wpdb;
 
