@@ -61,6 +61,17 @@ class HR_Employee {
         return $role_name ? $role_name : 'employee';
     }
 
+    public static function get_id_by_wp_user_id( $wp_user_id ) {
+        global $wpdb;
+
+        return (int) $wpdb->get_var(
+            $wpdb->prepare(
+                'SELECT id FROM ' . self::get_table_name() . ' WHERE wp_user_id = %d LIMIT 1',
+                absint( $wp_user_id )
+            )
+        );
+    }
+
     /**
      * Tworzy nowego pracownika w bazie danych
      */

@@ -67,9 +67,11 @@ class HR_API_Auth {
             $hr_role = 'employee';
         }
 
+        $employee_id = HR_Employee::get_id_by_wp_user_id( $user->ID );
+
         // Generujemy bezpieczny token JWT
         $jwt_handler = new HR_JWT_Handler();
-        $token = $jwt_handler->generate_token( $user->ID, $hr_role );
+        $token = $jwt_handler->generate_token( $user->ID, $employee_id, $hr_role );
 
         // Odpowiedź zwracana do Reacta / Vue / Agenta w C#
         return new WP_REST_Response( array(

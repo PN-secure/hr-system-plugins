@@ -25,7 +25,7 @@ class HR_JWT_Handler {
     /**
      * Generuje nowy token JWT dla zalogowanego użytkownika.
      */
-    public function generate_token( $wp_user_id, $hr_role = 'employee' ) {
+    public function generate_token( $wp_user_id, $employee_id, $hr_role = 'employee' ) {
         $issued_at = time();
         // Token ważny tylko przez 1 godzinę (dla bezpieczeństwa w razie kradzieży)
         $expiration_time = $issued_at + HOUR_IN_SECONDS; 
@@ -36,6 +36,7 @@ class HR_JWT_Handler {
             'iss'  => get_bloginfo('url'),// Wystawca (nasza domena)
             'data' => array(              // Paczka danych odczytywana przez API
                 'user_id' => $wp_user_id,
+                'employee_id' => $employee_id,
                 'role'    => $hr_role     // Np. 'hr_admin', 'manager', 'employee'
             )
         );
