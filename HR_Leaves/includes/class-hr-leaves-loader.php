@@ -23,6 +23,7 @@ class HR_Leaves_Loader {
         require_once HR_LEAVES_DIR . 'includes/models/class-hr-leave-request.php';
         require_once HR_LEAVES_DIR . 'includes/models/class-hr-calculator.php';
         require_once HR_LEAVES_DIR . 'includes/models/class-hr-time-entry.php';
+        require_once HR_LEAVES_DIR . 'includes/models/class-hr-delegations.php';
 
         // WARSTWA KONTROLERÓW (REST API)
         require_once HR_LEAVES_DIR . 'includes/api/class-hr-api-leave-types.php';

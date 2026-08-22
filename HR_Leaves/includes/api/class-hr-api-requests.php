@@ -123,8 +123,8 @@ class HR_API_Requests {
             $hr_current_user->employee_id
         );
 
-            // Sprawdzenie, czy przełożony może zmienić status tego konkretnego wniosku.
-            if ( ! $is_admin && ! $is_manager ) {
+        // Sprawdzenie, czy przełożony może zmienić status tego konkretnego wniosku.
+        if ( ! $is_admin && ! $is_manager ) {
             return new WP_Error(
                 'rest_forbidden', 'Nie masz uprawnień do zmiany statusu tego wniosku.',
                 array( 'status' => 403 )

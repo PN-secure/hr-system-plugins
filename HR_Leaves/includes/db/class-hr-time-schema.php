@@ -79,6 +79,7 @@ class HR_Leaves_Schema {
             start_date date NOT NULL,
             end_date date NOT NULL,
             status varchar(20) DEFAULT 'pending',
+            reason text DEFAULT '',
             created_at datetime DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
             KEY employee_id (employee_id)
